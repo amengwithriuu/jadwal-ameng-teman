@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Momentum — Productivity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <div id="confetti-canvas" aria-hidden="true"></div>
+
+  <header class="app-header">
+    <h1 class="logo">Momentum</h1>
+    <nav class="nav-tabs">
+      <button type="button" class="nav-tab active" data-view="today">Today</button>
+      <button type="button" class="nav-tab" data-view="calendar">Calendar</button>
+      <button type="button" class="nav-tab" data-view="stats">Statistics</button>
+      <button type="button" class="nav-tab" data-view="settings">Settings</button>
+    </nav>
+    <div class="theme-switcher">
+      <span class="theme-label">Theme</span>
+      <button type="button" class="theme-btn" data-theme="sakura" title="Soft Sakura">🌸</button>
+      <button type="button" class="theme-btn" data-theme="cloud" title="Cloud Nine">☁️</button>
+      <button type="button" class="theme-btn" data-theme="matcha" title="Pink Matcha">🍵</button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Quote -->
+    <section class="quote-card card">
+      <p id="daily-quote" class="quote-text">Loading...</p>
+    </section>
+
+    <!-- TODAY VIEW -->
+    <section id="view-today" class="view active">
+      <div class="date-display" id="today-date"></div>
+
+      <!-- H-Minus Countdown -->
+      <section class="card countdown-card">
+        <h2 class="card-title">H-Minus</h2>
+        <div class="countdown-form">
+          <input type="text" id="countdown-label" placeholder="e.g. Exam" maxlength="30" />
+          <input type="date" id="countdown-date" />
+          <button type="button" id="countdown-save" class="btn btn-accent">Save</button>
+        </div>
+        <div id="countdown-display" class="countdown-display hidden">
+          <span id="countdown-text"></span>
+          <span id="countdown-days" class="countdown-days"></span>
+        </div>
+      </section>
+
+      <!-- Mood -->
+      <section class="card mood-card">
+        <h2 class="card-title">Today's Mood</h2>
+        <div class="mood-buttons">
+          <button type="button" class="mood-btn" data-mood="happy" title="Happy">😊</button>
+          <button type="button" class="mood-btn" data-mood="neutral" title="Neutral">😐</button>
+          <button type="button" class="mood-btn" data-mood="sad" title="Sad">😢</button>
+        </div>
+        <p id="mood-status" class="mood-status">Not set</p>
+      </section>
+
+      <!-- Habits -->
+      <section class="card habits-card">
+        <div class="habits-header">
+          <h2 class="card-title">Habits</h2>
+          <button type="button" id="add-habit-btn" class="btn btn-accent">+ Add Habit</button>
+        </div>
+        <div class="habit-filters">
+          <button type="button" class="filter-btn active" data-filter="daily">Daily</button>
+          <button type="button" class="filter-btn" data-filter="weekly">Weekly</button>
+          <button type="button" class="filter-btn" data-filter="monthly">Monthly</button>
+        </div>
+        <div id="habits-list" class="habits-list"></div>
+        <div id="daily-progress" class="daily-progress">
+          <span>Daily progress</span>
+          <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
+          <span id="progress-text">0 / 0</span>
+        </div>
+      </section>
+
+      <!-- Undo toast -->
+      <div id="undo-toast" class="undo-toast hidden">
+        <span id="undo-message">Check undone</span>
+        <button type="button" id="undo-btn" class="btn btn-small">Undo</button>
+      </div>
+
+      <!-- Journal -->
+      <section class="card journal-card">
+        <h2 class="card-title">Daily Journal</h2>
+        <textarea id="journal-input" placeholder="How was your day?" rows="5"></textarea>
+        <p class="journal-date" id="journal-date-label"></p>
+      </section>
+    </section>
+
+    <!-- CALENDAR VIEW -->
+    <section id="view-calendar" class="view">
+      <h2 class="view-title">Calendar</h2>
+      <div class="calendar-controls">
+        <button type="button" id="cal-prev" class="btn btn-icon">←</button>
+        <span id="cal-month-year"></span>
+        <button type="button" id="cal-next" class="btn btn-icon">→</button>
+      </div>
+      <div id="calendar-grid" class="calendar-grid"></div>
+      <div id="calendar-detail" class="calendar-detail card hidden">
+        <h3 id="detail-date"></h3>
+        <div id="detail-mood"></div>
+        <div id="detail-habits"></div>
+        <div id="detail-journal"></div>
+      </div>
+    </section>
+
+    <!-- STATISTICS VIEW -->
+    <section id="view-stats" class="view">
+      <h2 class="view-title">Monthly Insights</h2>
+      <div id="stats-month-label" class="stats-month"></div>
+      <div class="stats-cards">
+        <div class="card stat-card">
+          <h3>Completion Rate</h3>
+          <p id="stat-completion" class="stat-value">—%</p>
+          <p id="stat-completion-desc" class="stat-desc"></p>
+        </div>
+        <div class="card stat-card">
+          <h3>Trend</h3>
+          <p id="stat-trend" class="stat-value">—</p>
+          <p id="stat-trend-desc" class="stat-desc"></p>
+        </div>
+        <div class="card stat-card">
+          <h3>Monthly Mood</h3>
+          <p id="stat-mood" class="stat-value">—</p>
+          <p id="stat-mood-desc" class="stat-desc"></p>
+        </div>
+      </div>
+      <div class="card chart-card">
+        <h3>Completion This Month</h3>
+        <canvas id="chart-completion" height="200"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3>Mood Overview</h3>
+        <canvas id="chart-mood" height="180"></canvas>
+      </div>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section id="view-settings" class="view">
+      <h2 class="view-title">Settings</h2>
+      <div class="card settings-card">
+        <h3>Data Backup</h3>
+        <p class="settings-desc">Export or import your habits, journal, mood, and settings.</p>
+        <div class="settings-buttons">
+          <button type="button" id="export-btn" class="btn btn-accent">Export Data (JSON)</button>
+          <label class="btn btn-secondary">
+            Import Data
+            <input type="file" id="import-file" accept=".json" hidden />
+          </label>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add Habit Modal -->
+  <div id="add-habit-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content card">
+      <h2 class="card-title">New Habit</h2>
+      <label>Name <input type="text" id="habit-name" placeholder="e.g. Morning run" maxlength="50" /></label>
+      <label>
+        Type
+        <select id="habit-type">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="habit-starred" />
+        <span>Star (track streak)</span>
+      </label>
+      <div class="modal-actions">
+        <button type="button" id="habit-cancel" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="habit-save" class="btn btn-accent">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
